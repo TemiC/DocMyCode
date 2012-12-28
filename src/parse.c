@@ -9,7 +9,7 @@
 
 
 
-int LireCaractere(char *nom){
+int DetecteCommentaire(char *nom){
 	FILE *from; 
 	char buffer[BUFFER_SIZE];
 	int n;
@@ -20,7 +20,6 @@ int LireCaractere(char *nom){
 		return -1;
 	}	
 	
-printf("test0\n");
 
 	while ((n = fread(buffer,sizeof(char),BUFFER_SIZE,from)) != 0) {
 		for( i = 0; i <= n; i++){
@@ -37,7 +36,7 @@ printf("test0\n");
 			}
 		}
 	 } 
-printf("test1\n");
+
 	
 	if (ferror(from)) {
 		perror("read"); 
