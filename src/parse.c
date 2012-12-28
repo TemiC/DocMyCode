@@ -8,21 +8,37 @@
 
 
 
+
 int LireCaractere(char *nom){
 	FILE *from; 
 	char buffer[BUFFER_SIZE];
 	int n;
+	int i;
+	int j;
 	
 	if (NULL == (from = fopen(nom ,"rb"))) {
 		return -1;
 	}	
+	
 printf("test0\n");
+
 	while ((n = fread(buffer,sizeof(char),BUFFER_SIZE,from)) != 0) {
-		if(*buffer == '/'){
-			fprintf(stdout," on a trouvé un commentaire\n "); 			
+		for( i = 0; i <= n; i++){
+			if( ((buffer[i] == '/') && (buffer[i+1] == '*'))  ||  ((buffer[i] == '/') && (buffer[i+1] == '*') && (buffer[i+2] == '*'))){
+				fprintf(stdout," on a trouvé le dedut du commentaire\n "); 			
+			}
+			else if(((buffer[i] == '/') && (buffer[i+1] == '/')) ){
+				fprintf(stdout," on a trouvé un commentaire\n "); 	
+			}
+
+			j = i+1;
+			if((buffer[j] == '*') && (buffer[j+1] == '/')){
+				fprintf(stdout," on a trouvé la fin du commentaire\n "); 			
+			}
 		}
+	 } 
 printf("test1\n");
-	}
+	
 	if (ferror(from)) {
 		perror("read"); 
 		clearerr(from); 
@@ -31,5 +47,5 @@ printf("test1\n");
 	fclose(from);
 	return 0;
  }
-
+ 	
 
