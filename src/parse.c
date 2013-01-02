@@ -61,7 +61,7 @@ int CommentaireOuvert1(char * nom){
 	}	
 	while ((n = fread(buffer,sizeof(char),BUFFER_SIZE,from)) != 0) {
 		for(i = 0; i < BUFFER_SIZE; i++){
-			if( ((buffer[i] == '/') && (buffer[i+1] == '*')) || ((buffer[i] == '/') && (buffer[i+1] == '*') && (buffer[i+2] == '*')) ){
+			if( ((buffer[i] == '/') && (buffer[i+1] == '*') && (buffer[i+2] == '*')) ){
 				/*fprintf(stdout," on a trouvé le dedut du commentaire\n "); */
 				return 1;
 			}
@@ -113,7 +113,7 @@ int CommentaireFerme(char * nom){
 
 
 
-int CommentaireDouble(char * nom){
+int CommentaireTriple(char * nom){
 	int i; 
 	int n;
 	FILE *from; 
@@ -123,7 +123,7 @@ int CommentaireDouble(char * nom){
 	}
 	while ((n = fread(buffer,sizeof(char),BUFFER_SIZE,from)) != 0) {
 		for(i = 0; i < BUFFER_SIZE; i++){
-			if( ((buffer[i] == '/') && (buffer[i+1] == '/')) ){
+			if( ((buffer[i] == '/') && (buffer[i+1] == '/') && (buffer[i+1] == '/')) ){
 				/*fprintf(stdout," on a trouvé un commentaire\n "); 	*/
 				return 1;
 			}
@@ -167,7 +167,7 @@ void DetecteCommentaire(char *nom){
 	}
   #endif	
   
-	else if( CommentaireDouble(nom) == 1) {
+	else if( CommentaireTriple(nom) == 1) {
 		fprintf(stdout," on a trouvé un commentaire\n");
 		return;
 	}
@@ -189,86 +189,6 @@ void DetecteCommentaire(char *nom){
 
 #ifdef IF
 
-String* CharToString( char* mot ){
-	String* string = (String*)malloc(sizeof(String));
-
-	if( string != NULL){
-		string->length = strlen(mot);
-		string->str = (char*)malloc((string->length+1)*sizeof(char));
-		if( string->str != NULL){
-			string->str = strcpy(string->str,mot);
-			return string;
-		}
-		return NULL;
-	}
-	return NULL;
-}
-
-
-
-int SizeArray(String string,	char* separator, int NumField){
-	int i, nbsep = 0, size = 0;
-	int sizeA = strlen(separator)+1; 
-	char* c = (char*)malloc(sizeA*sizeof(char));
-	c = strcpy(c,separator);
-
-	/* On parcours la chaîne de caractères. */
-	for(i = 0; i < string.length; i++) 
-	{
-		/* Si on a un séparateur suivit d'une lettre, on augmente le nombre de séparateurs trouvés. */
-		if( c[0] == separator[0]) 
-		{
-			nbsep += 1;				
-		}
-
-		/* On actualise le séparateur avec le contenu de la case sur laquelle on pointe dans la chaîne. */
-		c[0] = string.str[i];
-
-		/* Si le nombre de séparateur == nb champs et que l'on a un séparateur suivit d'une lettre.*/
-		if( (nbsep == NumField ) && ( c[0] != separator[0]))
-		   
-		{
-			/* On augmente la taille du tableau à allouer pour cette chaine (que l'on doit extraire).*/
-			size += 1;
-		}	
-	}
-	return size;
-}
-
-
-
-void ExtractString(String* string, int NumField){
-	char* separator;
-	int size = SizeArray(*string, separator, NumField);
-	char* ExtString = (char*)malloc((size+1) * sizeof(char));
-	int i, j = 0, nbsep = 0;
-	int sizeA = strlen(separator)+1; 
-	char* c = (char*)malloc(sizeA*sizeof(char));
-	c = strcpy(c,separator);
-
-	/* On parcours la chaîne de caractères. */
-	for(i = 0; i < string->length; i++) 
-	{		
-		/* Si on a un séparateur suivit d'une lettre, on augmente le nombre de séparateurs trouvés. */
-		if(c[0] == separator[0]){
-			nbsep += 1;				
-		}
-
-		/* On actualise le séparateur avec le contenu de la case sur laquelle on pointe dans la chaîne. */
-		c[0] = string->str[i];
-
-		/* Si le nombre de séparateur == nb champs et que l'on a un séparateur suivit d'une lettre.*/
-		if(( nbsep == NumField ) && ( c[0] != separator[0] )) 
-		{
-			/* On augmente la taille du tableau à allouer pour cette chaine (que l'on doit extraire).*/
-			ExtString[j] = c[0];
-			j++;
-		}	
-	}
-	string->str = strcpy(string->str,ExtString);
-}	
- 
- 
  	
 int DetecteBalise(char *nom){
 	FILE *from; 
