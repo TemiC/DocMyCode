@@ -14,12 +14,22 @@
 int main (int argc, char*argv[]){
 	FILE* file;
 	int i; 
-	for(i = 0; i< argc; i++){
+	for(i = 1; i< argc; i++){
 		if( (file = fopen(argv[i], "rb") ) == NULL) {
 			fprintf(stderr, "Erreur ouverture fichier %s\n",argv[i]);
 			return -1;
 		}
+		fprintf(stdout, "\nYour file contain :\n");
+		printf("\n");
 		cat(argv[i]); 
+		printf("\n");
+		
+		DetecteCommentaire(argv[i]);
+		printf("\n");
+		
+		fprintf(stdout, "Balise trouvée :\n");	
+		DetecteBalise(argv[i]);
+		/*cat(argv[i]);*/ 
 		fclose(file);
 	}
  return 0; 
