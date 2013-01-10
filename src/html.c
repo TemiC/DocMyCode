@@ -96,7 +96,7 @@ Tag *list_insert(Tag *l, char* tag, Cellule* fg, Cellule* fd, Cellule* child, Ce
 
 	
 	
-	
+#ifdef IF	
 /* delete */
 	
 void list_delete(Tag **l){
@@ -114,7 +114,7 @@ void list_delete(Tag **l){
     }
 }
 
-
+#endif
 
 /* length */
 
@@ -125,6 +125,50 @@ int list_length(Tag *l){
     }
     return ret;
 }
+
+
+int createBeginHtmlFile(char * name){
+	FILE *from; 
+	if (NULL == (from = fopen(name ,"w"))) {
+		return -1;
+	}
+	fprintf(from,"<html> \n\n <head> \n\t<title> My DocMyCode </title> \n </head> \n");
+
+	fclose(from);
+	return 0;
+}
+
+int createBodyHtmlFile(char * name){
+	FILE *from; 
+	if (NULL == (from = fopen(name ,"a"))) {
+		return -1;
+	}
+	fprintf(from,"\t\t<body>\n\t\t\t<h1> My DocMyCode </h1> \n \t\t\t\t<h2>Files Documentation </h2>\n");
+
+
+	fclose(from);
+	return 0;
+}	
+
+int createEndHtmlFile(char * name){
+	FILE *from; 
+	if (NULL == (from = fopen(name ,"a"))) {
+		return -1;
+	}
+	fprintf(from," \t\t</body> \n\n </html>\n");
+
+	fclose(from);
+	return 0;
+}
+
+
+
+
+
+
+
+
+
 
 
 
