@@ -5,64 +5,72 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef		WIN32
+#define		SEPARATOR		"\\"
+#else
+#define		SEPARATOR		"/"
+#endif
 
 #include "file.h"
 
 #define		DEBUG_FILEEXPLORER		1
 
-void exploreProjectDirectory(const char *basedir) {
+
+int exploreProjectDirectory(const char *directoryPath) {
 	DIR *dir;
-	char b[512];
-	struct dirent *ent;
+	char *subPath;
 	
-	dir = opendir(basedir);
-	
-	if(dir != NULL)
-	{
-		printf("\n\tWalking %s\n", basedir);
+	struct dirent *entry;
+	struct stat entry_stat;
+
+
+    if ((dir = opendir(directoryPath)) == NULL) {
+        fprintf(stderr, "ERROR : Not a valid path : %s\n", directoryPath);
+        return 0;
+    }
+
+    while ((entry = readdir(dir))) {
+
+		if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+			continue;
 		
-		while((ent = readdir(dir)) != NULL)
-		{
-			if(strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0)
-			{
+		
+        subPath = malloc((strlen(directoryPath) + strlen(entry->d_name) + 1) * sizeof(char*));
+        subPath[0] = '\0';
+        strcat(subPath, directoryPath);
+        strcat(subPath, SEPARATOR);
+        strcat(subPath, entry->d_name);
+        subPath[strlen(subPath)] = '\0';
+        
+        stat(subPath, &entry_stat);
+        if (S_ISDIR(entry_stat.st_mode)) {
+            exploreProjectDirectory(subPath);
+			printf("Found directory : %s\n", entry->d_name);
+        } else {
+			if (subPath[strlen(subPath)-2] != '.') {
+				if ((subPath[strlen(subPath)-1] != 'c' && subPath[strlen(subPath)-1] != 'h'))
+				free(subPath);
 				continue;
 			}
-			
-			char entpath[] = "";
-			strcat(entpath, basedir);
-			/*
-			strcat(entpath, "/");
-			*/
-			strcat(entpath, ent->d_name);
-			
-			if(isDir(entpath)) {
-				printf("\n\tDIR: %s\n", ent->d_name);
-				exploreProjectDirectory(entpath);
-			}
-			else
-			{
-				printf("\n\tFILE: %s\n", ent->d_name);
-			}
-		}
-		
-		closedir(dir);
-	}
-	else
-	{
-		fprintf(stderr, "\nFailed to walk directory \"%s\"\n", basedir);
-		if(DEBUG_FILEEXPLORER)
-		{
-			perror("opendir()");
-		}
-	}
+            if (subPath[strlen(subPath)-1] == 'c') {
+				printf("Found C Source file : %s\n", entry->d_name);
+				
+				
+				
+				
+				
+				
+            }
+            else {
+				printf("Found C/C++ Header file : %s\n", entry->d_name);
+            }
+        }
+        free(subPath);
+        subPath = NULL;
+    }
+
+    closedir(dir);
+
+    return 1;
 }
-
-
-int isDir(const char *file_path)
-{
-	struct stat s;
-	stat(file_path, &s);
-	return S_ISDIR(s.st_mode);
-}
-
 
