@@ -1,71 +1,68 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <dirent.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
-# include "explorer.h"
-# define BUFFER_SIZE 1024
+#include "file.h"
 
-/* 
-	->readcontainsdir(char*)
-fonction lisant le contenu d'un répertoire donné en 
-paramètre.
+#define		DEBUG_FILEEXPLORER		1
 
- */
- 
-/*
-int readcontainsdir (char *name){
-	DIR * dir;
-	struct dirent* dirent;
+void exploreProjectDirectory(const char *basedir) {
+	DIR *dir;
+	char b[512];
+	struct dirent *ent;
 	
-	if( (dir = opendir(name) ) == NULL ){
-		return -1;
-	 }
-		
-	while((dirent = readdir(dir)) != NULL) {
-		fprintf(stdout,"%s/ ",dirent->d_name);
-	}
+	dir = opendir(basedir);
 	
-	if (closedir(dir) == -1) {
-		return -1;
-	}
-return 0;
-}
-*/
-
-
-/*
-	->cat( char* )
- La fonction affiche le contenu du fichier
- présent dans le repertoire.
-*/
-
-int cat (char* nom) 
-{
-	FILE *from; 
-	char buffer[BUFFER_SIZE];
-	int n;
-	int exit_status = EXIT_SUCCESS;
-		if (NULL == (from = fopen(nom ,"rb"))) {
-			return -1;
-		}
+	if(dir != NULL)
+	{
+		printf("\n\tWalking %s\n", basedir);
 		
-		while ((n = fread(buffer,sizeof(char),BUFFER_SIZE,from)) != 0) {
-			if (fwrite(buffer,sizeof(char),n,stdout) != n) {
-				break; 
+		while((ent = readdir(dir)) != NULL)
+		{
+			if(strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0)
+			{
+				continue;
+			}
+			
+			char entpath[] = "";
+			strcat(entpath, basedir);
+			/*
+			strcat(entpath, "/");
+			*/
+			strcat(entpath, ent->d_name);
+			
+			if(isDir(entpath)) {
+				printf("\n\tDIR: %s\n", ent->d_name);
+				exploreProjectDirectory(entpath);
+			}
+			else
+			{
+				printf("\n\tFILE: %s\n", ent->d_name);
 			}
 		}
 		
-		if (ferror(from)) {
-			perror("read"); 
-			clearerr(from); 
-			exit_status = EXIT_FAILURE;
+		closedir(dir);
+	}
+	else
+	{
+		fprintf(stderr, "\nFailed to walk directory \"%s\"\n", basedir);
+		if(DEBUG_FILEEXPLORER)
+		{
+			perror("opendir()");
 		}
-		
-		if (ferror(stdout)){
-			perror("write");
-			clearerr(stdout); 
-			exit_status = EXIT_FAILURE;
-		}
-		
-		fclose(from);
-	
-	exit(exit_status);
+	}
 }
-	
+
+
+int isDir(const char *file_path)
+{
+	struct stat s;
+	stat(file_path, &s);
+	return S_ISDIR(s.st_mode);
+}
+
+
