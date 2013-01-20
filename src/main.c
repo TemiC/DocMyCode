@@ -7,33 +7,21 @@
 #include "fileexplorer.h"
 #include "html.h"
 
-#define	DEBUG_MAIN	1
+#define		DEBUG_MAIN		1
 
-int main(int argc, char** argv) {
-	FILE* src;
-	int i; 
-	for(; i< argc; i++){
-	/*while(i <= 1){*/
-		if (argc < 2) {
-			fprintf(stderr, "Please type your project's location.\n\n");
-			return EXIT_FAILURE;
-		}
-
-		if(argc == 2){
-			ProjectInfo* projectInfo = initProjectInfo(argv[1]);		
-			exploreProjectDirectory(projectInfo->projectPath);
-			break;
-		}
-		
-		if(argc >= 3){
-			if( (src = fopen(argv[i], "rb") ) == NULL) {
-				fprintf(stderr, "Erreur ouverture fichier %s\n",argv[i]);
-				return -1;
-			}
-		/* test=> 	printf("%s\n", argv[i]); */
-			break;
-		}
-
+int main(int argc, char** argv, char** env) {
+	
+	if (argc < 2) {
+		fprintf(stderr, "Please type your project's location.\n\n");
+		return EXIT_FAILURE;
 	}
+	ProjectInfo* projectInfo = initProjectInfo(argv[1]);
+	
+	ListFiles* files;
+	files = allocFile(files);
+	exploreProjectDirectory(projectInfo->projectPath, projectInfo, files);
+	
+	displayAllFiles(files);
+	
 	return EXIT_SUCCESS;
 }
