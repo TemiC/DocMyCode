@@ -13,6 +13,7 @@ void generateNewHTML(char* fileName, ProjectInfo* projectInfo, ListFiles* files)
 		return;
 	}
 	
+	
 	strcpy(docFilePath, projectInfo->docPath);
 	docFilePath[strlen(projectInfo->docPath)] = '\0';
 	strcat(docFilePath, fileName);
@@ -30,21 +31,64 @@ void generateNewHTML(char* fileName, ProjectInfo* projectInfo, ListFiles* files)
 		fprintf(stderr, "The file :\n%s could not be created.\n", docFilePath);
 		return;
 	}
+	char* projectNameTag;
+	if ((projectNameTag = malloc((strlen(projectInfo->projectName) + 36) * sizeof(char))) == NULL) {
+        fprintf(stderr, "Allocation error : %d -> %s\n", __LINE__, __FILE__);
+		return;
+	}
+	strcpy(projectNameTag, "\t\t<div id=\"project\"><h3>");
+	strcat(projectNameTag, projectInfo->projectName);
+	strcat(projectNameTag, "</h3></div>");
+		
 	fprintf(newHTMLFile, "<!doctype html>\n");
-		fprintf(newHTMLFile, "\t<html>\n");
-			fprintf(newHTMLFile, "\t\t<head>\n");
-				fprintf(newHTMLFile, "\t<title></title>\n");
-				fprintf(newHTMLFile, "\t<meta charster = \"utf-8\">\n");
-			fprintf(newHTMLFile, "\t</head>\n");		
+		fprintf(newHTMLFile, "<html>\n");
+			fprintf(newHTMLFile, "\t<head>\n");
+				fprintf(newHTMLFile, "\t\t<title></title>\n");
+				fprintf(newHTMLFile, "\t\t<meta charset = \"utf-8\">\n");
+				fprintf(newHTMLFile, "\t\t<link rel=\"stylesheet\" href=\"style.css\" type=\"text/css\">\n");
+
+				fprintf(newHTMLFile, "\t</head>\n");
 			fprintf(newHTMLFile, "\t<body>\n");	
-				fprintf(newHTMLFile, "\t<div id=\"fileName\" />\n");	
-				fprintf(newHTMLFile, "\t<div id=\"author\" />\n");	
-				fprintf(newHTMLFile, "\t<div id=\"version\" />\n");	
-				fprintf(newHTMLFile, "\t<div id=\"date\" />\n");	
-				fprintf(newHTMLFile, "\t<div id=\"brief\" />\n");	
-				fprintf(newHTMLFile, "\t<div id=\"details\" />\n");	
-				fprintf(newHTMLFile, "\t<div id=\"returnType\" />\n");	
+				fputs(projectNameTag, newHTMLFile);
+				fprintf(newHTMLFile, "\t\t<div id=\"fileName\"></div>\n");
+				fprintf(newHTMLFile, "\t\t<div id=\"author\"></div>\n");
+				fprintf(newHTMLFile, "\t\t<div id=\"version\"></div>\n");	
+				fprintf(newHTMLFile, "\t\t<div id=\"date\"></div>\n");	
+				fprintf(newHTMLFile, "\t\t<div id=\"brief\"></div>\n");	
+				fprintf(newHTMLFile, "\t\t<div id=\"details\"></div>\n");	
+				fprintf(newHTMLFile, "\t\t<div id=\"returnType\"></div>\n");
+				fprintf(newHTMLFile, "\t\t<div id=\"funcList\">\n");
+				fprintf(newHTMLFile, "\t\t<ul>");
+					fprintf(newHTMLFile, "\t\t\t<li>Fucntion 1</li>\n");
+					fprintf(newHTMLFile, "\t\t\t<li>Fucntion 2</li>\n");
+					fprintf(newHTMLFile, "\t\t\t<li>Fucntion 3</li>\n");
+				fprintf(newHTMLFile, "\t\t</ul>\n");
 			fprintf(newHTMLFile, "\t</body>\n");		
-		fprintf(newHTMLFile, "\t</html>\n");		
+		fprintf(newHTMLFile, "</html>\n");		
+	free(docFilePath);
+	free(projectNameTag);
 	fclose(newHTMLFile);
 }
+
+void generateNewCSS(ProjectInfo* projectInfo) {
+	char* cssPath;
+	if (cssPath = malloc(sizeof(char) * (strlen(projectInfo->docPath) + 8))) {
+		fprintf(stderr, "Allocation error : %d -> %s\n", __LINE__, __FILE__);
+		return;
+	}
+	strcpy(cssPath, projectInfo->docPath);
+	strcat(cssPath, "style.css");	
+	printf("%s\n", cssPath);
+
+	free(cssPath);
+	
+	
+	
+}
+
+
+
+
+
+
+
