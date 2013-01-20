@@ -15,7 +15,7 @@
 #define		DEBUG_FILE		1
 
 
-ProjectInfo* initProjectInfo(const char* projectPath) {
+ProjectInfo* initProjectInfo(const char* projectPath, const char* projectName) {
 	ProjectInfo* projectInfo;
 	
 	if ((projectInfo = malloc(sizeof(ProjectInfo))) == NULL) {
@@ -27,14 +27,19 @@ ProjectInfo* initProjectInfo(const char* projectPath) {
 		return NULL;
 	}
 	strcpy(projectInfo->projectPath, projectPath);
-	if ((projectInfo->docPath= malloc((strlen(projectPath) + 3 + SEP_LENGTH) * sizeof(char))) == NULL) {
+	if ((projectInfo->docPath = malloc((strlen(projectPath) + 3 + SEP_LENGTH) * sizeof(char))) == NULL) {
         fprintf(stderr, "Allocation error : %d -> %s\n", __LINE__, __FILE__);
 		return NULL;
 	}
 	strcat(projectInfo->docPath, projectPath);
 	strcat(projectInfo->docPath, "doc");
 	strcat(projectInfo->docPath, SEPARATOR);
-	printf("Porject Directory : %s\nProject documentation dir : %s\n", projectInfo->projectPath, projectInfo->docPath);
+	if ((projectInfo->projectName = malloc((strlen(projectName)) * sizeof(char))) == NULL) {
+        fprintf(stderr, "Allocation error : %d -> %s\n", __LINE__, __FILE__);
+		return NULL;
+	}
+	strcpy(projectInfo->projectName, projectName);
+	printf("Project Name : %s\nProject Directory : %s\nProject documentation dir : %s\n", projectInfo->projectName, projectInfo->projectPath, projectInfo->docPath);
 	return projectInfo;
 }
 
@@ -198,7 +203,7 @@ void setReturnType(ListFiles* files, const char *returnType) {
 }
 
 void displayFile(ListFiles* files) {
-	if (files->fileName != NULL)
+	if (files->fileName[0] != '\0')
 		printf("FICHIER : %s\n", files->fileName);
 }
 

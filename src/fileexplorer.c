@@ -46,7 +46,7 @@ void exploreProjectDirectory(const char *directoryPath, ProjectInfo* projectInfo
         subPath = malloc(sizeof(char*)*(strlen(directoryPath)+strlen(entry->d_name)+1));
         *subPath = '\0';
         strcat(subPath, directoryPath);
-        //strncpy(subPath, directoryPath, strlen(directoryPath) - 1);
+        /*strncpy(subPath, directoryPath, strlen(directoryPath) - 1);*/
         strcat(subPath, "/");
         strcat(subPath, entry->d_name);
         subPath[strlen(subPath)] = '\0';
@@ -62,7 +62,7 @@ void exploreProjectDirectory(const char *directoryPath, ProjectInfo* projectInfo
 			}
              else if (subPath[strlen(subPath)-1] == 'h') {
  				printf("Found C/C++ Header file : %s\n", entry->d_name);
-// 				addFile(files, entry->d_name, entry->d_name);
+				/*addFile(files, entry->d_name, entry->d_name);*/
 				generateNewHTML(entry->d_name);
              }
              else if (subPath[strlen(subPath)-1] == 'c') {
