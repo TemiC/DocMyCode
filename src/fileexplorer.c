@@ -16,61 +16,66 @@
 #define		DEBUG_FILEEXPLORER		1
 
 
-int exploreProjectDirectory(const char *directoryPath) {
-	DIR *dir;
-	char *subPath;
-	
-	struct dirent *entry;
-	struct stat entry_stat;
 
+void exploreProjectDirectory(const char *directoryPath, ProjectInfo* projectInfo, ListFiles* files) {
+    DIR *dir = NULL;
+    char *subPath;
+	char* mkdir;
+
+	if ((mkdir = malloc(strlen(projectInfo->docPath) + 6)) == NULL) {
+        fprintf(stderr, "explore : %s\n", directoryPath);
+        return;
+    }
+    
+    strcpy(mkdir, "mkdir ");
+	strcat(mkdir, projectInfo->docPath);    
+    
+	struct dirent *entry;
+    struct stat entry_stat;
+
+	system(mkdir);
 
     if ((dir = opendir(directoryPath)) == NULL) {
-        fprintf(stderr, "ERROR : Not a valid path : %s\n", directoryPath);
-        return 0;
+        fprintf(stderr, "explore : %s\n", directoryPath);
+        return;
     }
 
     while ((entry = readdir(dir))) {
-
-		if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-			continue;
-		
-		
-        subPath = malloc((strlen(directoryPath) + strlen(entry->d_name) + 1) * sizeof(char*));
-        subPath[0] = '\0';
+        if (entry->d_name[0] == '.')
+            continue;
+        subPath = malloc(sizeof(char*)*(strlen(directoryPath)+strlen(entry->d_name)+1));
+        *subPath = '\0';
         strcat(subPath, directoryPath);
-        strcat(subPath, SEPARATOR);
+        //strncpy(subPath, directoryPath, strlen(directoryPath) - 1);
+        strcat(subPath, "/");
         strcat(subPath, entry->d_name);
         subPath[strlen(subPath)] = '\0';
-        
         stat(subPath, &entry_stat);
         if (S_ISDIR(entry_stat.st_mode)) {
-            exploreProjectDirectory(subPath);
-			printf("Found directory : %s\n", entry->d_name);
-        } else {
-			if (subPath[strlen(subPath)-2] != '.') {
-				if ((subPath[strlen(subPath)-1] != 'c' && subPath[strlen(subPath)-1] != 'h'))
+            printf("Found directory : %s\n", entry->d_name);
+			exploreProjectDirectory(subPath, projectInfo, files);
+        }
+        else {
+			if ((subPath[strlen(subPath)-1] != 'c' && subPath[strlen(subPath)-1] != 'h')) {
 				free(subPath);
 				continue;
 			}
-            if (subPath[strlen(subPath)-1] == 'c') {
+             else if (subPath[strlen(subPath)-1] == 'h') {
+ 				printf("Found C/C++ Header file : %s\n", entry->d_name);
+// 				addFile(files, entry->d_name, entry->d_name);
+				generateNewHTML(entry->d_name);
+             }
+             else if (subPath[strlen(subPath)-1] == 'c') {
 				printf("Found C Source file : %s\n", entry->d_name);
-				
-				
-				
-				
-				
-				
+				files = addFile(files, entry->d_name, entry->d_name);
+				generateNewHTML(entry->d_name, projectInfo, NULL);
             }
-            else {
-				printf("Found C/C++ Header file : %s\n", entry->d_name);
-            }
-        }
+
+		}
+
         free(subPath);
         subPath = NULL;
     }
-
     closedir(dir);
 
-    return 1;
 }
-
