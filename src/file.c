@@ -4,50 +4,49 @@
 
 #include "file.h"
 
-#define		DEBUG_FILE		0
+#ifdef		WIN32
+#define		SEPARATOR		"\\"
+#define		SEP_LENGTH		2
+#else
+#define		SEPARATOR		"/"
+#define		SEP_LENGTH		1
+#endif
+
+#define		DEBUG_FILE		1
+
 
 ProjectInfo* initProjectInfo(const char* projectPath) {
 	ProjectInfo* projectInfo;
+	
 	if ((projectInfo = malloc(sizeof(ProjectInfo))) == NULL) {
         fprintf(stderr, "Allocation error : %d -> %s\n", __LINE__, __FILE__);
 		return NULL;
 	}
-	if ((projectInfo->projectPath = malloc(sizeof(strlen(projectPath) + 1))) == NULL) {
-        fprintf(stderr, "Allocation error : %d -> %s\n", __LINE__, __FILE__);
-		return NULL;
-	}
-	if ((projectInfo->docPath = malloc(sizeof(strlen(projectPath) + 9))) == NULL) {
+	if ((projectInfo->projectPath = malloc(strlen(projectPath) * sizeof(char))) == NULL) {
         fprintf(stderr, "Allocation error : %d -> %s\n", __LINE__, __FILE__);
 		return NULL;
 	}
 	strcpy(projectInfo->projectPath, projectPath);
-	if (DEBUG_FILE == 1)
-		printf("%s\n", projectInfo->projectPath);
-	/*
-	strcpy(projectInfo->docPath, projectPath);
-	strcat(projectInfo->docPath, "doc/");
-	*/
+	if ((projectInfo->docPath= malloc((strlen(projectPath) + 3 + SEP_LENGTH) * sizeof(char))) == NULL) {
+        fprintf(stderr, "Allocation error : %d -> %s\n", __LINE__, __FILE__);
+		return NULL;
+	}
+	strcat(projectInfo->docPath, projectPath);
+	strcat(projectInfo->docPath, "doc");
+	strcat(projectInfo->docPath, SEPARATOR);
+	printf("Porject Directory : %s\nProject documentation dir : %s\n", projectInfo->projectPath, projectInfo->docPath);
 	return projectInfo;
 }
 
-
-void allocFile(ListFiles *files) {
+ListFiles* allocFile(ListFiles *files) {
     if ((files = malloc(sizeof(ListFiles))) == NULL) {
         fprintf(stderr, "Allocation error : %d -> %s\n", __LINE__, __FILE__);
         return;
     }
+	files->previous = NULL;
+	files->next = NULL;
 }
 
-void initFile(ListFiles* files) {
-    files->isLocked = 0;
-	files->fileName = NULL;
-    files->author = NULL;
-    files->version = NULL;
-    files->date = NULL;
-    files->brief = NULL;
-    files->details = NULL;
-	files->returnType = NULL;
-}
 
 ListFiles* rewindList(ListFiles* files) {
 	if (files->previous == NULL)
@@ -55,34 +54,50 @@ ListFiles* rewindList(ListFiles* files) {
 	else {
 		while (files->previous != NULL) {
 			files = files->previous;
-		}	
+		}
+		return files;
 	}
 }
 
 ListFiles* forwardList(ListFiles* files) {
-	if (files->next == NULL)
+	if (files == NULL || files->next == NULL) {
 		return files;
+	}
 	else {
 		while (files->next != NULL) {
 			files = files->next;
-		}	
+		}
+		files = allocFile(files);
+		return files;
 	}
+
+
+
+
+
+
 }
 
 
-void addFile(ListFiles* files, File* newFile) {
-    if (files == NULL)
-        return;
+ListFiles* addFile(ListFiles* files, const char* fileName, const char* fileAbsolutePath) {	
+	if (files == NULL) {
+		files = allocFile(files);
+	}
 	
-	files = forwardList(files);
-	files->isLocked = newFile->isLocked;
-	files->fileName = newFile->fileName;
-	files->author = newFile->author;
-	files->version = newFile->version;
-	files->date = newFile->date;
-	files->brief = newFile->brief;
-	files->details = newFile->details;
-	files->returnType = newFile->returnType;
+	/*files = forwardList(files);*/
+	if ((files->fileName = malloc(sizeof(char) * strlen(fileName) + 1)) == NULL) {
+        fprintf(stderr, "Allocation error : %d -> %s\n", __LINE__, __FILE__);
+        return;
+    }
+    strcpy(files->fileName, fileName);
+	if ((files->fileAbsolutePath = malloc(sizeof(char) * strlen(fileAbsolutePath) + 1)) == NULL) {
+        fprintf(stderr, "Allocation error : %d -> %s\n", __LINE__, __FILE__);
+        return;
+    }
+    strcpy(files->fileAbsolutePath, fileAbsolutePath);
+	files->next = allocFile(files);
+	files = files->next;
+	return files;
 }
 
 void setFileName(ListFiles* files, const char *fileName) {
@@ -96,6 +111,19 @@ void setFileName(ListFiles* files, const char *fileName) {
     }
     strcpy(files->fileName, fileName);
 }
+
+void setFileAbsolutePath(ListFiles* files, const char *fileAbsolutePath) {
+    if (fileAbsolutePath == NULL)
+        return;
+
+	files = forwardList(files);
+    if ((files->fileAbsolutePath = malloc(sizeof(char) * (strlen(fileAbsolutePath) + 1))) == NULL) {
+        fprintf(stderr, "Allocation error : %d -> %s\n", __LINE__, __FILE__);
+        return;
+    }
+    strcpy(files->fileAbsolutePath, fileAbsolutePath);
+}
+
 
 void setAuthor(ListFiles* files, const char *author) {
     if (author == NULL)
@@ -170,18 +198,16 @@ void setReturnType(ListFiles* files, const char *returnType) {
 }
 
 void displayFile(ListFiles* files) {
-	if (files->fileName == NULL)
-		return;
-	
-	else
-		printf("Nom du fichier source : %s\n", files->fileName);
+	if (files->fileName != NULL)
+		printf("FICHIER : %s\n", files->fileName);
 }
 
 void displayAllFiles(ListFiles* files) {
 	files = rewindList(files);
-	if (files == NULL)
-		return;
-	displayFile(files);
+	while (files != NULL) {
+		displayFile(files);
+		files = files->next;
+	}
 }
 
 
